@@ -1,3 +1,10 @@
+//Nota: 4
+//test: MB
+//1)B Los aparatos quedaron bastantes "tontos", le roba responsabilidad el paciente y hay codigo duplicado por no heredar
+//2) B+
+//3) Regular-: mucho codigo duplicado
+//4) MB
+
 class Paciente{
 	var property dolor = null
 	var property edad = null
@@ -6,6 +13,10 @@ class Paciente{
 	
 	method usarAparato(aparato){
 		if (self.puedeUsarAparato(aparato)){
+		//TODO: pobre uso de polimorfismo: por cada criterio nuevo que quiera modificar un aparato hay
+		//que agregar un método nuevo en todos los demás. La mejor solución es 
+		// que el aparato reciba una orden y sea éste el que eliga si mandar los mensajes con efecto.
+	
 		dolor = self.dolor() - aparato.puntosDeDolor(self)
 		fortaleza = self.fortaleza() + aparato.puntosDeFortaleza(self)}
 		else{
@@ -18,6 +29,8 @@ class Paciente{
 	}
 	
 	method puedeRealizarSesion(){
+		//TODO: Codigo duplicado: si el caso de uso en los test llaman al metodo: paciente.puedeUsarAparato(aparato)
+		//Entonces acá el cuerpo del mensaje también tiene que ser self.puedeUsarAparato(aparato)
 		return self.rutina().all({aparato => aparato.puedeUsarlo(self)})
 	}
 	
@@ -36,6 +49,9 @@ class Paciente{
 
 class PacienteResistente inherits Paciente{
 	override method realizarSesionCompleta(){
+		//TODO: innecesario checkeo: llamar a super ya realiza el checkeo y corta el flujo si falla
+		//queda codigo duplicado
+		//TODO: emprolijar indentacion
 		if (self.puedeRealizarSesion()){
 		super()
 		fortaleza = self.fortaleza() + self.cantidadRutinas()
@@ -55,10 +71,13 @@ class PacienteCaprichoso inherits Paciente{
 		override method puedeRealizarSesion(){
 		return super() and self.tieneEnLaRutinaAparatoDeColor("rojo")
 	}
+		//TODO: innecesario checkeo: llamar a super ya realiza el checkeo y corta el flujo si falla
+		//queda codigo duplicado
 	
 	override method realizarSesionCompleta(){
 		if (self.puedeRealizarSesion()){
 		super()
+		//TODO: código duplicado, este foreach ya está en la superclase 
 		self.rutina().forEach({aparato => self.usarAparato(aparato)})
 	}
 	else
@@ -69,6 +88,8 @@ class PacienteCaprichoso inherits Paciente{
 }
 
 class PacienteRapidaRecuperacion inherits Paciente{
+	//TODO: esto no puede ser una variable del objeto, 
+	// porque tiene que tener el mismo valor para todos los objetos
 	var property recuperacionDolor = 3
 	
 	method cambiarValorRecuperacion(valor){
@@ -76,7 +97,9 @@ class PacienteRapidaRecuperacion inherits Paciente{
 	}
 	
 	override method realizarSesionCompleta(){
+		//TODO Codigo duplicado: usar super()
 		if (self.puedeRealizarSesion()){
+		//TODO: Codigo duplicado	
 		self.rutina().forEach({aparato => self.usarAparato(aparato)})
 		dolor = self.dolor() - self.recuperacionDolor() 
 	}
@@ -96,6 +119,7 @@ class Centro{
 	}
 	
 	method pacientesChiquitos(){
+		//TODO: condicion duplicada de si es pequeño con el minitramp
 		return	self.pacientes().filter({paciente => paciente.edad() < 8})
 	}
 	
@@ -105,6 +129,7 @@ class Centro{
 }
 
 class Magneto{
+	//Extraer a una superclase, quedó duplicada la definición y el valor default
 	var property color = "blanco"
 	
 	method puntosDeDolor(paciente) = paciente.dolor() * 10 / 100
@@ -133,7 +158,8 @@ class Minitramp{
 	
 	method puntosDeFortaleza(paciente) = paciente.edad() * 10 /100
 	
-	method puedeUsarlo(paciente){ 
+	method puedeUsarlo(paciente){
+		//TODO: parentesis innecesarios 
 		return (paciente.dolor() < 20)	
 	}
 }
